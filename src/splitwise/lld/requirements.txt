@@ -1,0 +1,58 @@
+// Split wise LLD
+Functional requirements
+1. Users should be able to create accounts
+2. Users should be add/delete/update expenses
+3. Users should be able to create/leave/join groups
+4. Users can settle expenses.
+5. Costs can be balanced
+
+Non Functional Requirements
+1. Highly Available
+2. Highly Scalable
+
+HLD                                                                                                                     authenticationService
+                                                                                                                        /|\
+user ----web socket connection (peer to peer)---load balanced(consistent hashing)--> gateway--->>load balancer-->accountCreationService-->distributed caching -->datastore
+                                                                                                        \|/
+                                                                                               load balancer-->groupCreationService-->distributed caching -->datastore
+                                                                                                        \|/
+                                                                                               load balancer-->expensesService-->distributed caching -->datastore
+
+Api specs
+userId createUser(apiKey,userInformation); |pk-userId|userInformation,create time,etc|
+addExpenseToUniqueUser(apikey,userId1,userId2,expense); |pk-userId1|userId2|expense|
+groupId  createGroup(apiKey,groupInfo);  |pk-groupId|groupInformation, create time,etc|
+addUserToGroup(apiKey,userId,groupId);   |pk-groupId|userId1|userId2|userInformation, create time,etc|
+addExpenseToUserInGroup(apikey,userId,groupId,expense);  |pk-groupId|userId|userId2|expense|userInformation, create time,etc|
+removeUserFromGroup(apikey,userId,groupId);   |pk-groupId|userId|userId2|expense|userInformation, create time,etc|
+settleUp(userId1,userId2);  |pk-userId1|userId2|expense|
+
+LLD
+
+abstract Session{
+addExpense(userId1,userid2,expense);
+updateExpense(userId1,userid2,expense);
+deleteExpense(userId1,userid2,expense);
+settleup(userid1,userid2);
+}
+Users extend Session{
+name
+emailId
+userId,userInformation createUser(name,emailId);
+userId,userInformation updateUser(userID);
+deleteUser(userId);
+}
+
+group extends Session{
+group information
+list users;
+groupId,userInformation createGroup(group name etc..);
+groupId,userInformation updateGroup(list userID,info);
+deleteGroup(groupId);
+}
+
+balanceAlgo
+
+
+
+
